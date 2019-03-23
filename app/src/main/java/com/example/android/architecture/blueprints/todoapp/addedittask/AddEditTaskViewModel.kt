@@ -53,6 +53,7 @@ class AddEditTaskViewModel(
    */
   private val intentsSubject: PublishSubject<AddEditTaskIntent> = PublishSubject.create()
   private val statesObservable: Observable<AddEditTaskViewState> = compose()
+  private val effectsSubject: PublishSubject<AddEditTaskViewEffect> = PublishSubject.create()
 
   /**
    * take only the first ever InitialIntent and all intents of other types
@@ -74,6 +75,7 @@ class AddEditTaskViewModel(
 
   override fun states(): Observable<AddEditTaskViewState> = statesObservable
 
+    fun effects(): Observable<AddEditTaskViewEffect> = effectsSubject
   /**
    * Compose all components to create the stream logic
    */
@@ -84,6 +86,11 @@ class AddEditTaskViewModel(
         // Special case where we do not want to pass this event down the stream
         .filter { action -> action !is AddEditTaskAction.SkipMe }
         .compose(actionProcessorHolder.actionProcessor)
+            .doOnNext {
+              if (it is CreateTaskResult.Success) {
+                effectsSubject.onNext(AddEditTaskViewEffect(true))
+              }
+            }
         // Cache each state and pass it to the reducer to create a new state from
         // the previous cached one and the latest Result emitted from the action processor.
         // The Scan operator is used here for the caching.

@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import com.example.android.architecture.blueprints.todoapp.R
 import com.example.android.architecture.blueprints.todoapp.mvibase.MviIntent
 import com.example.android.architecture.blueprints.todoapp.mvibase.MviView
@@ -90,6 +91,7 @@ class AddEditTaskFragment : Fragment(), MviView<AddEditTaskIntent, AddEditTaskVi
   private fun bind() {
     // Subscribe to the ViewModel and call render for every emitted state
     disposables.add(viewModel.states().subscribe(this::render))
+    disposables.add(viewModel.effects().subscribe(this::effect))
     // Pass the UI's intents to the ViewModel
     viewModel.processIntents(intents())
   }
@@ -112,6 +114,12 @@ class AddEditTaskFragment : Fragment(), MviView<AddEditTaskIntent, AddEditTaskVi
     // Wrap the FAB click events into a SaveTaskIntent and set required information
     return RxView.clicks(fab).map {
       AddEditTaskIntent.SaveTask(argumentTaskId, title.text.toString(), description.text.toString())
+    }
+  }
+
+  fun effect(effect: AddEditTaskViewEffect) {
+    if (effect.isShowSuccess) {
+      Toast.makeText(context, "Horray" ,Toast.LENGTH_SHORT).show()
     }
   }
 
